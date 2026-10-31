@@ -1,0 +1,8 @@
+Variable1,Variable2,rho,p,sig
+Empowerment,Performance,0.66,0,***
+Participation Freq,Performance,0.152,0.3417,
+Participation Type,Performance,0.054,0.7367,
+Decision Making,Performance,-0.087,0.5906,
+Incentives,Performance,NA,NA,
+Empowerment,Participation Freq,0.286,0.0702,†
+Empowerment,Decision Making,-0.176,0.2702,

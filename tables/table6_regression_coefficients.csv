@@ -1,0 +1,5 @@
+Predictor,B,SE,t,p
+(Intercept),1.61,0.348,4.629,0
+empowerment_score,0.546,0.103,5.306,0
+dec_making_n,-0.038,0.138,-0.277,0.783
+incentive_n,NA,NA,NA,NA
