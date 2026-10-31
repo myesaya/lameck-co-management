@@ -449,6 +449,8 @@ reg_gt <- tidy(model, conf.int = TRUE) |>
   tab_source_note("† p<.10  * p<.05  ** p<.01  *** p<.001") |>
   tab_source_note("NOTE: Report only if all assumption checks pass (see diagnostics below).")
 
+
+
 print(reg_gt)
 gtsave(reg_gt, here("tables", "table5_regression.docx"))
 cat("Table 5 saved → tables/table5_regression.docx\n\n")
@@ -509,45 +511,6 @@ if (nrow(influential) > 0) {
   print(influential |> select(.row_id, .cooksd, .hat, .std.resid))
 }
 
-# Plots: residuals, QQ of residuals, Cook's distance, leverage
-p1 <- ggplot(augmented, aes(.fitted, .resid)) +
-  geom_point(colour = "#2C7BB6", size = 2) +
-  geom_hline(yintercept = 0, linetype = "dashed", colour = "#D7191C") +
-  geom_smooth(se = FALSE, colour = "grey50", linewidth = 0.7) +
-  labs(title = "Residuals vs Fitted",
-       x = "Fitted Values", y = "Residuals") +
-  theme_classic(base_size = 11)
-
-p2 <- ggplot(augmented, aes(sample = .std.resid)) +
-  stat_qq(colour = "#2C7BB6", size = 2) +
-  stat_qq_line(colour = "#D7191C", linewidth = 0.8) +
-  labs(title = "QQ Plot — Standardised Residuals",
-       x = "Theoretical Quantiles", y = "Standardised Residuals") +
-  theme_classic(base_size = 11)
-
-p3 <- ggplot(augmented, aes(seq_along(.cooksd), .cooksd)) +
-  geom_bar(stat = "identity", fill = "#2C7BB6") +
-  geom_hline(yintercept = cooks_cut, colour = "#D7191C",
-             linetype = "dashed", linewidth = 0.8) +
-  annotate("text", x = 2, y = cooks_cut * 1.1,
-           label = sprintf("4/n = %.3f", cooks_cut),
-           colour = "#D7191C", hjust = 0, size = 3) +
-  labs(title = "Cook's Distance",
-       x = "Observation Index", y = "Cook's Distance") +
-  theme_classic(base_size = 11)
-
-p4 <- ggplot(augmented, aes(.hat, .std.resid)) +
-  geom_point(aes(size = .cooksd), colour = "#2C7BB6", alpha = 0.7) +
-  geom_hline(yintercept = c(-2, 2), linetype = "dashed", colour = "grey50") +
-  scale_size_continuous(name = "Cook's D") +
-  labs(title = "Leverage vs Standardised Residuals",
-       x = "Leverage (hat values)", y = "Standardised Residuals") +
-  theme_classic(base_size = 11)
-
-ggsave(here("figures", "regression_diagnostics.png"),
-       plot = (p1 + p2) / (p3 + p4),
-       width = 12, height = 10, dpi = 300)
-cat("✔  Regression diagnostic plots saved → figures/regression_diagnostics.png\n\n")
 
 # ── 6e. Decision: report regression or not? ────────────────────────────────
 cat("── ASSUMPTION SUMMARY & REPORTING DECISION ─────────────────────────────\n")
@@ -579,46 +542,6 @@ if (all_pass) {
   cat("   This is more defensible for N=41 ordinal Likert data regardless.\n")
 }
 
-# =============================================================================
-# 7. SAVE TABLES FOR CHAPTER 4
-# =============================================================================
-
-cat("\n── SAVING OUTPUT TABLES ────────────────────────────────────────────────\n")
-
-# Table 1: Demographics
-write_csv(demo_tbl,   here("tables", "table1_demographics.csv"))
-
-# Table 2: Empowerment means
-write_csv(emp_items,  here("tables", "table2_empowerment_means.csv"))
-
-# Table 3: Performance means
-write_csv(perf_items, here("tables", "table3_performance_means.csv"))
-
-# Table 4: Reliability
-reliability_tbl <- tibble(
-  Scale         = c("Community Empowerment", "Co-management Performance"),
-  N_items       = c(5L, 7L),
-  Cronbach_alpha = round(c(alpha_emp$total$raw_alpha, alpha_perf$total$raw_alpha), 3)
-)
-write_csv(reliability_tbl, here("tables", "table4_reliability.csv"))
-
-# Table 5: Spearman correlations
-write_csv(cor_table, here("tables", "table5_spearman_correlations.csv"))
-
-# Table 6: OLS regression (saved regardless; use only if assumptions pass)
-tidy_reg <- tidy(model) |>
-  rename(Predictor = term, B = estimate, SE = std.error,
-         t = statistic, p = p.value) |>
-  mutate(across(where(is.numeric), ~ round(.x, 3)))
-glance_reg <- glance(model) |>
-  select(r.squared, adj.r.squared, statistic, p.value, df, df.residual) |>
-  mutate(across(everything(), ~ round(.x, 3)))
-
-write_csv(tidy_reg,   here("tables", "table6_regression_coefficients.csv"))
-write_csv(glance_reg, here("tables", "table6_regression_model_fit.csv"))
-
-cat("✔  All tables saved to tables/\n")
-cat("✔  All figures saved to figures/\n\n")
 
 # =============================================================================
 # 8. SESSION INFO
